@@ -2,7 +2,8 @@ use std::{sync::Arc, time::Duration};
 
 use axum::{
     extract::{
-        ws::{self, close_code::UNSUPPORTED, CloseFrame, Utf8Bytes, WebSocket}, State, WebSocketUpgrade
+        State, WebSocketUpgrade,
+        ws::{self, CloseFrame, Utf8Bytes, WebSocket, close_code::UNSUPPORTED},
     },
     response::Response,
 };
@@ -24,7 +25,7 @@ pub async fn chat(ws: WebSocketUpgrade, State(channel): State<Arc<Channel>>) -> 
 
 fn close_frame(code: u16, reason: &str) -> CloseFrame {
     CloseFrame {
-        code: code,
+        code,
         reason: reason.into(),
     }
 }
@@ -54,11 +55,7 @@ async fn handle_socket(socket: WebSocket, state: Arc<Channel>) {
     tokio::spawn(listener(rx, state.clone(), user));
 }
 
-async fn listener(
-    mut rx: SplitStream<WebSocket>,
-    channel: Arc<Channel>,
-    user: Utf8Bytes,
-) {
+async fn listener(mut rx: SplitStream<WebSocket>, channel: Arc<Channel>, user: Utf8Bytes) {
     while let Some(msg) = rx.next().await {
         let Ok(msg) = msg else {
             tracing::warn!("socket closed");

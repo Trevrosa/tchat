@@ -53,7 +53,8 @@ async fn main() -> anyhow::Result<()> {
                 break;
             }
         }
-    }).await?;
+    })
+    .await?;
 
     let _ = tokio::join!(receiver, sender);
 
